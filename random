@@ -1,0 +1,68 @@
+## I MIGHT USE THIS LATER WHO KNOWS.
+## I DON"T KNOW WHAT NEURAL NETWORKS ARE YET
+
+train_old = pd.read_csv('https://raw.githubusercontent.com/google-research/google-research/master/goemotions/data/train.tsv', sep='\t', names = ['text', 'emotion', 'identity'])
+test_old = pd.read_csv('https://raw.githubusercontent.com/google-research/google-research/master/goemotions/data/test.tsv', sep='\t', names = ['text', 'emotion', 'identity'])
+
+train = train_old[['text', 'emotion']]
+test = test_old[['text', 'emotion']]
+#train.head()
+
+print(train.shape)
+print(test.shape)
+
+ekman = {"anger": ["anger", "annoyance", "disapproval"], 
+         "disgust": ["disgust"],
+         "fear": ["fear", "nervousness"],
+         "joy": ["joy", "amusement", "approval", "excitement", "gratitude",  "love", "optimism", "relief", "pride", "admiration", "desire", "caring"],
+         "sadness": ["sadness", "disappointment", "embarrassment", "grief",  "remorse"],
+         "surprise": ["surprise", "realization", "confusion", "curiosity"]}
+         
+emo_num = {'admiration': '1', 
+           'amusement': '2',
+           'anger' : '3',
+           'annoyance' : '4',
+           'approval' : '5',
+           'caring' : '6',
+           'confusion' : '7',
+           'curiosity' : '8',
+           'desire' : '9',
+           'disappointment' : '10',
+           'disapproval' : '11',
+           'disgust' : '12',
+           'embarrassment' : '13',
+           'excitement' : '14',
+           'fear' : '15',
+           'gratitude' : '16',
+           'grief' : '17',
+           'joy' : '18',
+           'love' : '19',
+           'nervousness' : '20',
+           'optimism' : '21',
+           'pride' : '22',
+           'realization' : '23',
+           'relief' : '24',
+           'remorse' : '25',
+           'sadness' : '26',
+           'surprise' : '27',
+           'neutral' : '28'}
+           
+def match_emo_to_key(emotion):
+  for key, value in emo_num.items():
+      if emotion == value:
+        return key
+
+train['words'] = train['emotion'].apply(match_emo_to_key)
+
+def match_emo_to_key2(word):
+  for key, value in ekman.items():
+    for x in value:
+      if word == x:
+        return key
+
+train['main_emo'] = train['words'].apply(match_emo_to_key2)
+
+train.head(10)
+
+temp = train.groupby('main_emo').count()['text'].reset_index().sort_values(by = 'text', ascending = False)
+temp.style.background_gradient(cmap='Purples')
